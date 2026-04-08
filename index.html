@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationship Vibe Check (20 Questions)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --main-color: #8A5CF5; --bg-light: #F4F0FF; }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg-light); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #444; padding: 20px 0; }
+        .container { width: 95%; max-width: 420px; }
+        .card { background: white; border-radius: 35px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
+        
+        /* Header */
+        .result-header { background: #EBE4FF; padding: 40px 20px; text-align: center; }
+        .emoji-main { font-size: 80px; margin-bottom: 10px; display: block; }
+        .tagline { color: var(--main-color); font-size: 0.95rem; font-weight: 500; margin-bottom: 5px; }
+        .result-name { font-size: 2rem; font-weight: bold; color: #5B21B6; }
+        
+        /* Content */
+        .content { padding: 30px 25px; text-align: center; }
+        .desc-box { background: #F8F6FF; border-radius: 20px; padding: 20px; margin-bottom: 25px; border: 1px solid #EEE; }
+        .flag-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .desc-text { font-size: 0.95rem; color: #666; line-height: 1.5; }
+
+        /* Progress Bar */
+        .bar-container { margin: 25px 0; }
+        .bar-labels { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; font-weight: 500; color: #888; }
+        .bar-bg { background: #EFEFEF; height: 12px; border-radius: 10px; position: relative; overflow: hidden; }
+        #bar-fill { background: linear-gradient(90deg, #A78BFA, #8A5CF5); height: 100%; width: 0%; transition: 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+
+        /* Buttons */
+        .btn-main { background: var(--main-color); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(138, 92, 245, 0.3); }
+        .btn-main:active { transform: scale(0.96); }
+
+        /* Quiz UI */
+        #quiz-section { padding: 40px 20px; text-align: center; }
+        .q-text { font-size: 1.2rem; font-weight: 500; margin-bottom: 25px; color: #333; min-height: 4rem; display: flex; align-items: center; justify-content: center; }
+        .opt-btn { background: white; border: 2px solid #F0F0F0; padding: 14px; border-radius: 15px; width: 100%; margin-bottom: 10px; cursor: pointer; font-family: 'Kanit'; font-size: 0.95rem; transition: 0.2s; color: #555; text-align: left; }
+        .opt-btn:hover { border-color: var(--main-color); background: #FBF9FF; color: var(--main-color); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div id="quiz-section">
+            <div id="progress-tag" style="color: #BBB; font-size: 0.8rem; margin-bottom: 10px; letter-spacing: 1px;">QUESTION 1/20</div>
+            <div id="progress-bar" style="background: #EEE; height: 4px; border-radius: 2px; margin-bottom: 20px; overflow: hidden;">
+                <div id="progress-fill" style="background: var(--main-color); width: 5%; height: 100%; transition: 0.3s;"></div>
+            </div>
+            <div id="question" class="q-text">กำลังโหลด...</div>
+            <div id="options"></div>
+        </div>
+
+        <div id="result-section" style="display: none;">
+            <div class="result-header">
+                <span id="res-emoji" class="emoji-main">🐱</span>
+                <div class="tagline">คุณคือแฟนประเภท...</div>
+                <div id="res-name" class="result-name">ชื่อผลลัพธ์</div>
+            </div>
+            <div class="content">
+                <div class="desc-box">
+                    <span id="res-flag" class="flag-icon">💚</span>
+                    <div id="res-desc" class="desc-text">คำอธิบายผลลัพธ์</div>
+                </div>
+
+                <div class="bar-container">
+                    <div class="bar-labels">
+                        <span>ความนุ่มนิ่ม <span id="soft-val">0</span>%</span>
+                        <span>ความรุกแรง <span id="bold-val">0</span>%</span>
+                    </div>
+                    <div class="bar-bg"><div id="bar-fill"></div></div>
+                </div>
+
+                <button class="btn-main" onclick="location.reload()">ลองอีกครั้ง</button>
+                <p style="font-size: 0.8rem; color: #AAA; margin-top: 20px;">แชร์ให้เพื่อนทายด้วยนะ!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // A: แมวขี้อ้อน (รับ/ละมุน), B: ไมโครเวฟ (รุก/ละมุน), C: ยัยตัวร้าย (รับ/แซ่บ), D: ท่านประธาน (รุก/แซ่บ)
+    const questions = [
+        { q: "1. เดทแรกที่คุณอยากไปที่สุด?", a: [{t: "คาเฟ่แมว หรือที่เงียบๆ นั่งคุยกัน", s: "A"}, {t: "ไปเวิร์คช็อป หรือทำอาหารด้วยกัน", s: "B"}, {t: "สวนสนุก ไปเล่นเครื่องเล่นหวาดเสียว", s: "C"}, {t: "ดินเนอร์หรูบนรูฟท็อป หรือขับรถเล่น", s: "D"}] },
+        { q: "2. สไตล์การแชทของคุณเป็นแบบไหน?", a: [{t: "ส่งสติ๊กเกอร์เยอะๆ พิมพ์ช้านิดนึง", s: "A"}, {t: "ตอบไว ถามไถ่ตลอดว่าทำอะไรอยู่", s: "B"}, {t: "ส่งรูปมีมกวนๆ เน้นปั่นประสาท", s: "C"}, {t: "พิมพ์สั้นๆ ได้ใจความ หรือเน้นโทรคุย", s: "D"}] },
+        { q: "3. เวลาแฟนงอน คุณจะทำยังไง?", a: [{t: "ทำตัวไม่ถูก นั่งหงอยๆ รอเขาใจเย็น", s: "A"}, {t: "ค่อยๆ อธิบายเหตุผล และซื้อขนมมาง้อ", s: "B"}, {t: "แกล้งแหย่ให้เขาหลุดขำ", s: "C"}, {t: "ดึงเข้ามากอดเลย ไม่ต้องพูดเยอะ", s: "D"}] },
+        { q: "4. ถ้าเพื่อนแซวว่าคุณคลั่งรัก คุณจะตอบว่า?", a: [{t: "หน้าแดง ปฏิเสธเสียงสั่น", s: "A"}, {t: "ยิ้มรับเบาๆ ยอมรับแบบเขินๆ", s: "B"}, {t: "ด่าเพื่อนกลับแบบขำๆ", s: "C"}, {t: "ก็คลั่งรักจริงอะ ทำไมล่ะ?", s: "D"}] },
+        { q: "5. ถ้าเล่นเกมด้วยกันแล้วแพ้ คุณจะ...", a: [{t: "นอยด์ โทษตัวเองที่เล่นไม่เก่ง", s: "A"}, {t: "บอกว่าไม่เป็นไร ตาหน้าเอาใหม่นะ", s: "B"}, {t: "โวยวาย โทษเน็ต โทษเกม โทษแฟน!", s: "C"}, {t: "บอกแฟนให้อยู่เฉยๆ เดี๋ยวตานี้แบกเอง", s: "D"}] },
+        { q: "6. เวลาหึง คุณมีอาการยังไง?", a: [{t: "แอบเก็บไปคิดมากคนเดียว เงียบลง", s: "A"}, {t: "บอกตรงๆ ว่ารู้สึกไม่ค่อยโอเค", s: "B"}, {t: "ประชดประชันด้วยคำพูดจิกกัดนิดๆ", s: "C"}, {t: "แสดงความเป็นเจ้าของต่อหน้าคนอื่นทันที", s: "D"}] },
+        { q: "7. คุณชอบให้แฟนสกินชิพแบบไหน?", a: [{t: "ลูบหัวเบาๆ หรือจับมือ", s: "A"}, {t: "กอดจากด้านหลังแน่นๆ", s: "B"}, {t: "หยิกแก้ม บีบจมูก หรือกัดเบาๆ", s: "C"}, {t: "โอบเอว หรือจุ๊บแก้มตอนเผลอ", s: "D"}] },
+        { q: "8. ถ้าแฟนลืมวันครบรอบ?", a: [{t: "แอบน้ำตาซึม แอบน้อยใจ", s: "A"}, {t: "เตือนความจำเขาแบบซอฟต์ๆ", s: "B"}, {t: "งอนหนักมาก! ต้องมีของง้อชุดใหญ่", s: "C"}, {t: "ไม่เป็นไร ฉันจำได้และเตรียมของไว้แล้ว", s: "D"}] },
+        { q: "9. วันหยุดยาว อยากทำอะไรด้วยกัน?", a: [{t: "นอนเปื่อย ซุกตัวอยู่ใต้ผ้าห่มทั้งวัน", s: "A"}, {t: "จัดแพลนทริป เตรียมทุกอย่างให้พร้อม", s: "B"}, {t: "ชวนทำชาเลนจ์แปลกๆ หรือเล่นเกมทำโทษ", s: "C"}, {t: "จ่ายตั๋วพาบินไปเที่ยวต่างประเทศเลย", s: "D"}] },
+        { q: "10. ท่าทางตอนคุณอยากจะ 'อ้อน'?", a: [{t: "เอาหัวไปถูๆ ไถๆ ที่ไหล่เขา", s: "A"}, {t: "จับมือเขามาลูบผมตัวเอง", s: "B"}, {t: "อ้อนแบบแปลกๆ เช่น เอาคางไปเกยหัว", s: "C"}, {t: "สั่งให้เขามานั่งใกล้ๆ แล้วกอด", s: "D"}] },
+        { q: "11. ถ้าแฟนทำอาหารมาให้แต่มันไม่อร่อย?", a: [{t: "ฝืนกินจนหมดเพราะเกรงใจ", s: "A"}, {t: "ชมความตั้งใจ และบอกว่าคราวหน้าทำด้วยกันนะ", s: "B"}, {t: "ล้อเลียนว่า 'นี่อาหารหรือยาพิษ' แต่ก็กิน", s: "C"}, {t: "วางช้อน แล้วสั่งเดลิเวอรี่ร้านโปรดมาให้แทน", s: "D"}] },
+        { q: "12. เวลาแฟนป่วย คุณจะทำยังไง?", a: [{t: "นั่งเฝ้าข้างเตียง มองด้วยความเป็นห่วง", s: "A"}, {t: "เช็ดตัว ทำข้าวต้ม เตรียมยาให้เสร็จสรรพ", s: "B"}, {t: "บ่นว่า 'บอกแล้วใช่มั้ย!' แต่ก็คอยดูแล", s: "C"}, {t: "ลางานพุ่งไปหา พาไปคลินิก จ่ายค่าหมอให้", s: "D"}] },
+        { q: "13. สถานะของคุณในกลุ่มเพื่อนคือ?", a: [{t: "ลูกเจี๊ยบของกลุ่ม โดนเพื่อนแกล้งตลอด", s: "A"}, {t: "พ่อ/แม่ของกลุ่ม คอยเก็บทรงให้เพื่อน", s: "B"}, {t: "ตัวชง ตัวเปิด ตัวสร้างคอนเทนต์", s: "C"}, {t: "หัวหน้าแก๊ง คนเคาะตัดสินใจทุกเรื่อง", s: "D"}] },
+        { q: "14. เจอแมวจรจัดข้างทาง คุณจะ...?", a: [{t: "ย่อตัวลงไปเล่นด้วย ใช้เสียงสอง", s: "A"}, {t: "วิ่งไปมินิมาร์ทซื้อขนมแมวเลียมาให้", s: "B"}, {t: "ถ่ายรูปลงสตอรี่ตั้งแคปชั่นกวนๆ", s: "C"}, {t: "ถ้ามันอ้อนนัก ก็จับอุ้มกลับบ้านเลย", s: "D"}] },
+        { q: "15. ถ้าแฟนบอกว่าเหนื่อยจากงานจัง?", a: [{t: "ส่งสติ๊กเกอร์กอดๆ ไปรัวๆ", s: "A"}, {t: "คอลหาทันทีเพื่อรับฟังปัญหา", s: "B"}, {t: "ส่งคลิปตลกๆ ไปให้ดูคลายเครียด", s: "C"}, {t: "ขับรถไปรับพาไปกินของอร่อยเดี๋ยวนี้", s: "D"}] },
+        { q: "16. เวลาโดนคนอื่นจ้องตาใกล้ๆ?", a: [{t: "หลบตา หน้าแดง ทำตัวไม่ถูก", s: "A"}, {t: "ยิ้มตอบกลับไปอย่างเป็นมิตร", s: "B"}, {t: "ทำหน้ากวนๆ ใส่ หรือจ้องจับผิดกลับ", s: "C"}, {t: "จ้องกลับแบบไม่ยอมแพ้ ใครหลบก่อนแพ้!", s: "D"}] },
+        { q: "17. คำพูดติดปากเวลาคุณเขินจัด?", a: [{t: "เงียบกริบ เอาหน้าซ่อน...", s: "A"}, {t: "'น่ารักจังเลยนะเราเนี่ย'", s: "B"}, {t: "'บ้าป่าวเนี่ย! เลิกพูดเลย'", s: "C"}, {t: "ยิ้มมุมปาก ไม่พูดอะไร", s: "D"}] },
+        { q: "18. ถ้าไปเดินห้างแล้วคนเยอะมาก แฟนจะหลง?", a: [{t: "จับชายเสื้อเขาไว้แน่นๆ", s: "A"}, {t: "เอื้อมไปจับมือเขามาประสานกัน", s: "B"}, {t: "เดินไปเกาะหลังเขาเหมือนรถไฟ", s: "C"}, {t: "ดึงแขนเขาให้มาเดินข้างหน้าเรา คอยคุม", s: "D"}] },
+        { q: "19. นิยามความรักในมุมมองของคุณ?", a: [{t: "ความอบอุ่นและการพึ่งพากัน", s: "A"}, {t: "การจับมือและเติบโตไปด้วยกัน", s: "B"}, {t: "สีสัน ความสนุก ที่ไม่น่าเบื่อ", s: "C"}, {t: "การปกป้องและดูแลเขาให้ดีที่สุด", s: "D"}] },
+        { q: "20. ประโยคบอกรักสไตล์คุณ?", a: [{t: "'เค้ารักเตงนะ...'", s: "A"}, {t: "'ดูแลตัวเองดีๆ นะ เป็นห่วง'", s: "B"}, {t: "'ก็รักแหละ... มั้งนะ'", s: "C"}, {t: "'เธอเป็นของฉัน จำไว้ด้วย'", s: "D"}] }
+    ];
+
+    let scores = { A: 0, B: 0, C: 0, D: 0 };
+    let currentIdx = 0;
+
+    function showQuestion() {
+        let q = questions[currentIdx];
+        document.getElementById("progress-tag").innerText = `QUESTION ${currentIdx + 1}/${questions.length}`;
+        
+        // อัปเดตขีด Progress Bar ด้านบนคำถาม
+        let progressPercent = ((currentIdx + 1) / questions.length) * 100;
+        document.getElementById("progress-fill").style.width = progressPercent + "%";
+
+        document.getElementById("question").innerText = q.q;
+        let optDiv = document.getElementById("options");
+        optDiv.innerHTML = "";
+        
+        q.a.forEach(opt => {
+            let b = document.createElement("button");
+            b.innerText = opt.t;
+            b.className = "opt-btn";
+            b.onclick = () => {
+                scores[opt.s]++;
+                currentIdx++;
+                if(currentIdx < questions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            };
+            optDiv.appendChild(b);
+        });
+    }
+
+    function showResult() {
+        document.getElementById("quiz-section").style.display = "none";
+        document.getElementById("result-section").style.display = "block";
+        
+        // คำนวณหาผู้ชนะ (Type ที่คะแนนเยอะสุด)
+        let winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        
+        // คำนวณเปอร์เซ็นต์ (C+D คือกลุ่มรุกแรง/Spicy | A+B คือกลุ่มนุ่มนิ่ม/Soft)
+        let spicyScore = scores.C + scores.D;
+        let boldPercent = Math.round((spicyScore / questions.length) * 100);
+        let softPercent = 100 - boldPercent;
+        
+        const data = {
+            A: { name: "เจ้าแมวขี้อ้อน", emoji: "🐱", flag: "💙", desc: "ธงฟ้า — คุณคือสายละมุนที่ชอบการถูกรักและถูกดูแลที่สุด พลังทำลายล้างอยู่ที่ความนุ่มนิ่ม ใครเห็นก็อยากโอ๋!" },
+            B: { name: "ไมโครเวฟเคลื่อนที่", emoji: "🧸", flag: "💚", desc: "ธงเขียว — คุณคือพื้นที่ปลอดภัยของทุกคน ใส่ใจเก่ง อบอุ่นจนคนรอบข้างละลาย ใครได้เป็นแฟนถือว่าโชคดีมาก" },
+            C: { name: "ยัยตัวแสบจอมวางแผน", emoji: "🦊", flag: "🧡", desc: "ธงส้ม — คุณมีความน่ารักแบบร้ายๆ ชอบแกล้งให้เขาเขินเล่น เป็นสีสันที่ทำให้ความรักไม่น่าเบื่อเลยสักวัน" },
+            D: { name: "บอสใหญ่สายรุก", emoji: "🐺", flag: "❤️", desc: "ธงแดง — ชัดเจน ตรงไปตรงมา ถ้าชอบคือพุ่งชน! คุณชอบเป็นคนคุมจังหวะความสัมพันธ์ และปกป้องแฟนได้ดีเยี่ยม" }
+        };
+
+        const res = data[winner];
+        document.getElementById("res-name").innerText = res.name;
+        document.getElementById("res-emoji").innerText = res.emoji;
+        document.getElementById("res-flag").innerText = res.flag;
+        document.getElementById("res-desc").innerText = res.desc;
+
+        // ใส่ค่าเข้า Bar และให้มันค่อยๆ เลื่อน
+        setTimeout(() => {
+            document.getElementById("bar-fill").style.width = boldPercent + "%";
+            document.getElementById("bold-val").innerText = boldPercent;
+            document.getElementById("soft-val").innerText = softPercent;
+        }, 150);
+    }
+
+    showQuestion();
+</script>
+</body>
+</html>
